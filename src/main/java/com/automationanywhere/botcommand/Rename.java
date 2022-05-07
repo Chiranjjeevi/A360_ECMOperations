@@ -1,6 +1,5 @@
 package com.automationanywhere.botcommand;
 
-
 import com.automationanywhere.botcommand.data.Value;
 import com.automationanywhere.botcommand.data.impl.StringValue;
 import com.automationanywhere.botcommand.exception.BotCommandException;
@@ -20,22 +19,21 @@ import java.util.Map;
 import static com.automationanywhere.commandsdk.model.AttributeType.GROUP;
 import static com.automationanywhere.commandsdk.model.AttributeType.TEXT;
 import static com.automationanywhere.commandsdk.model.DataType.STRING;
+
 /**
  * @author Chiranjjeevi Vijayakumar (CJ)
  *
  */
 
-//BotCommand makes a class eligible for being considered as an action.
 @BotCommand
-//CommandPks adds required information to be displayable on GUI.
+
 @CommandPkg(
         //Unique name inside a package and label to display.
-        name = "Move", label = "[[Move.label]]",
-        node_label = "[[Move.node_label]]", description = "[[Move.description]]", icon = "pkg.svg",
-        return_label = "[[Move.return_label]]", return_type = STRING, return_required = false)
+        name = "Rename", label = "[[Rename.label]]", node_label = "[[Rename.node_label]]", description = "[[Rename.description]]", icon = "pkg.svg",
+        return_label = "[[Rename.return_label]]", return_type = STRING, return_required = false)
 
-public class Move {
-    private static Logger logger = LogManager.getLogger(Move.class);
+public class Rename {
+    private static Logger logger = LogManager.getLogger(Rename.class);
     @Sessions
     private Map<String, Object> sessionMap;
 
@@ -44,50 +42,35 @@ public class Move {
     String authGroup;
 
     @Idx(index = "4", type = GROUP)
-    @Pkg(label = "[[Move.destinationIDGroup.label]]")
-    String destIDGroup;
-
-    @Idx(index = "5", type = GROUP)
-    @Pkg(label = "[[Move.originalIDGroup.label]]")
-    String orgIDGroup;
+    @Pkg(label = "[[Rename.newNameGroup.label]]")
+    String newNameGroup;
 
     @Execute
     public Value<String> action(
-
             @Idx(index = "1", type = TEXT)
             @Pkg(label = "[[SessionName.label]]", description = "[[SessionName.description]]", default_value_type = STRING, default_value = "Default")
             @NotEmpty
-                    String sessionName,
+                String sessionName,
 
             @Idx(index = "2", type = TEXT)
-            @Pkg(label = "[[EcmURL.label]]", description = "[[EcmURL.description]]")
+            @Pkg(label = "[[EcmURL.label]]", description = "[[Rename.ecmURL.description]]")
             @NotEmpty
-                    String ecmMoveURL,
+                String ecmRenameURL,
 
             @Idx(index = "3.1", type = TEXT)
             @Pkg(label = "[[AuthName.label]]", description = "[[AuthName.description]]", default_value_type = STRING, default_value = "OTCSTICKET")
             @NotEmpty
-                    String authKey,
+                String authKey,
 
             @Idx(index = "4.1", type = TEXT)
-            @Pkg(label = "[[Key.label]]", default_value_type = STRING, default_value = "parent_id")
+            @Pkg(label = "[[Key.label]]", default_value_type = STRING, default_value = "name")
             @NotEmpty
-                    String destinationIDKey,
+                String newNameKey,
 
             @Idx(index = "4.2", type = TEXT)
-            @Pkg(label = "[[Value.label]]", description = "[[Move.destinationID.description]]")
+            @Pkg(label = "[[Value.label]]", description = "[[Rename.newName.description]]")
             @NotEmpty
-                    String destinationIDValue,
-
-            @Idx(index = "5.1", type = TEXT)
-            @Pkg(label = "[[Key.label]]", default_value_type = STRING, default_value = "original_id")
-            @NotEmpty
-                    String originalIDKey,
-
-            @Idx(index = "5.2", type = TEXT)
-            @Pkg(label = "[[Value.label]]", description = "[[Move.originalID.description]]")
-            @NotEmpty
-                    String originalIDValue) throws IOException, InterruptedException{
+                String newNameValue)  throws IOException, InterruptedException {
 
         //NULL Check
         if (sessionName == null || "".equals(sessionName.trim()))
@@ -96,35 +79,29 @@ public class Move {
         if (!sessionMap.containsKey(sessionName))
             throw new BotCommandException("There are no existing session");
 
-        if (ecmMoveURL == null || "".equals(ecmMoveURL.trim()))
-            throw new BotCommandException("Please provide ECM Move API");
+        if (ecmRenameURL == null || "".equals(ecmRenameURL.trim()))
+            throw new BotCommandException("Please provide ECM Rename API URL");
 
         if (authKey == null || "".equals(authKey.trim()))
             throw new BotCommandException("Please provide ECM Auth Key parameter name");
 
-        if (destinationIDKey == null || "".equals(destinationIDKey.trim()))
-            throw new BotCommandException("Please enter Destination Node ID key parameter name");
+        if (newNameKey == null || "".equals(newNameKey.trim()))
+            throw new BotCommandException("Please enter Name key parameter name");
 
-        if (destinationIDValue == null || "".equals(destinationIDValue.trim()))
-            throw new BotCommandException("Please enter Destination Node ID value");
-
-        if (originalIDKey == null || "".equals(originalIDKey.trim()))
-            throw new BotCommandException("Please enter Folder or File Node ID key parameter name to Move ");
-
-        if (originalIDValue == null || "".equals(originalIDValue.trim()))
-            throw new BotCommandException("Please enter Folder or File Node ID to Move ");
+        if (newNameValue == null || "".equals(newNameValue.trim()))
+            throw new BotCommandException("Please enter New name");
 
         //Business Logic
-        try{
+        try {
             /*..Initialize Session*/
             var sessionValues = (Map<String, Object>)sessionMap.get(sessionName);
             var ticket = sessionValues.get("Ticket").toString();
 
-            var request = destinationIDKey+"="+destinationIDValue+"&"+originalIDKey+"="+originalIDValue;
+            var request = newNameKey+"="+newNameValue;
 
-            var url = new URL(ecmMoveURL);
+            var url = new URL(ecmRenameURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
+            con.setRequestMethod("PUT");
             con.setRequestProperty(authKey,ticket);
 
             var response = HttpUtils.execute(con, request.toString());
@@ -136,9 +113,11 @@ public class Move {
 
             /*..Return StringValue*/
             return new StringValue(returnValue);
+
         }
         catch (Exception e)
-        { throw new BotCommandException("Error occurred while ECM Move: " + e.getMessage()); }
+        { throw new BotCommandException("Error occurred while ECM rename: " + e.getMessage()); }
+
     }
     public void setSessionMap(Map<String, Object> sessionMap) {
         this.sessionMap = sessionMap;

@@ -8,7 +8,6 @@ import com.automationanywhere.commandsdk.annotations.*;
 import com.automationanywhere.commandsdk.annotations.rules.NotEmpty;
 import com.automationanywhere.helpers.HttpUtils;
 import com.automationanywhere.helpers.Utils;
-import com.jayway.jsonpath.JsonPath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
+import static com.automationanywhere.commandsdk.model.AttributeType.GROUP;
 import static com.automationanywhere.commandsdk.model.AttributeType.TEXT;
 import static com.automationanywhere.commandsdk.model.DataType.STRING;
 /**
@@ -31,15 +31,28 @@ import static com.automationanywhere.commandsdk.model.DataType.STRING;
         //Unique name inside a package and label to display.
         name = "CreateFolder", label = "[[CreateFolder.label]]",
         node_label = "[[CreateFolder.node_label]]", description = "[[CreateFolder.description]]", icon = "pkg.svg",
-
-        //Return type information. return_type ensures only the right kind of variable is provided on the UI.
         return_label = "[[CreateFolder.return_label]]", return_type = STRING, return_required = false)
 
 public class CreateFolder {
     private static Logger logger = LogManager.getLogger(CreateFolder.class);
-
     @Sessions
     private Map<String, Object> sessionMap;
+
+    @Idx(index = "3", type = GROUP)
+    @Pkg(label = "[[AuthGroup.label]]")
+    String authGroup;
+
+    @Idx(index = "4", type = GROUP)
+    @Pkg(label = "[[CreateFolder.typeGroup.label]]")
+    String typeGroup;
+
+    @Idx(index = "5", type = GROUP)
+    @Pkg(label = "[[CreateFolder.parentIDGroup.label]]")
+    String parentIDGroup;
+
+    @Idx(index = "6", type = GROUP)
+    @Pkg(label = "[[CreateFolder.nameGroup.label]]")
+    String nameGroup;
 
     @Execute
     public Value<String> action(
@@ -50,25 +63,44 @@ public class CreateFolder {
                     String sessionName,
 
             @Idx(index = "2", type = TEXT)
-            @Pkg(label = "[[CreateFolder.ecmURL.label]]", description = "[[CreateFolder.ecmURL.description]]")
+            @Pkg(label = "[[EcmURL.label]]", description = "[[EcmURL.description]]")
             @NotEmpty
                     String ecmCreateFolderURL,
 
-            @Idx(index = "3", type = TEXT)
-            @Pkg(label = "[[CreateFolder.ecmText.label]]", description = "[[CreateFolder.ecmText.description]]", default_value_type = STRING, default_value = "0")
+            @Idx(index = "3.1", type = TEXT)
+            @Pkg(label = "[[AuthName.label]]", description = "[[AuthName.description]]", default_value_type = STRING, default_value = "OTCSTICKET")
             @NotEmpty
-            String ecmType,
+                    String authKey,
 
-            @Idx(index = "4", type = TEXT)
-            @Pkg(label = "[[CreateFolder.parentID.label]]")
-            //Ensure that a validation error is thrown when the value is null.
+            @Idx(index = "4.1", type = TEXT)
+            @Pkg(label = "[[Key.label]]",default_value_type = STRING, default_value = "type")
             @NotEmpty
-                    String parentID,
+                    String ecmTypeKey,
 
-            @Idx(index = "5", type = TEXT)
-            @Pkg(label = "[[CreateFolder.folderName.label]]")
+            @Idx(index = "4.2", type = TEXT)
+            @Pkg(label = "[[Value.label]]", description = "[[CreateFolder.ecmText.description]]", default_value_type = STRING, default_value = "0")
             @NotEmpty
-                    String folderName)  throws IOException, InterruptedException {
+                    String ecmTypeValue,
+
+            @Idx(index = "5.1", type = TEXT)
+            @Pkg(label = "[[Key.label]]",default_value_type = STRING, default_value = "parent_id")
+            @NotEmpty
+                    String parentIDKey,
+
+            @Idx(index = "5.2", type = TEXT)
+            @Pkg(label = "[[Value.label]]")
+            @NotEmpty
+                    String parentIDValue,
+
+            @Idx(index = "6.1", type = TEXT)
+            @Pkg(label = "[[Key.label]]",default_value_type = STRING, default_value = "name")
+            @NotEmpty
+                    String folderNameKey,
+
+            @Idx(index = "6.2", type = TEXT)
+            @Pkg(label = "[[Value.label]]")
+            @NotEmpty
+                    String folderNameValue)  throws IOException, InterruptedException {
 
         //NULL Check
         if (sessionName == null || "".equals(sessionName.trim()))
@@ -80,39 +112,50 @@ public class CreateFolder {
         if (ecmCreateFolderURL == null || "".equals(ecmCreateFolderURL.trim()))
             throw new BotCommandException("Please provide ECM Create Folder API");
 
-        if (ecmType == null ||"".equals(ecmType.trim()))
+        if (authKey == null || "".equals(authKey.trim()))
+            throw new BotCommandException("Please provide ECM Auth Key parameter name");
+
+        if (ecmTypeKey == null ||"".equals(ecmTypeKey.trim()))
+            throw new BotCommandException("Please enter ECM type key parameter");
+
+        if (ecmTypeValue == null ||"".equals(ecmTypeValue.trim()))
             throw new BotCommandException("Please enter ECM type value");
 
-        if (parentID == null || "".equals(parentID.trim()))
-            throw new BotCommandException("Please enter Parent Node ID");
+        if (parentIDKey == null || "".equals(parentIDKey.trim()))
+            throw new BotCommandException("Please enter Parent Node ID key parameter");
 
-        if (folderName == null || "".equals(folderName.trim()))
-            throw new BotCommandException("Please enter Folder Name");
+        if (parentIDValue == null || "".equals(parentIDValue.trim()))
+            throw new BotCommandException("Please enter Parent Node ID value");
+
+        if (folderNameKey == null || "".equals(folderNameKey.trim()))
+            throw new BotCommandException("Please enter Parent Node ID key parameter");
+
+        if (folderNameValue == null || "".equals(folderNameValue.trim()))
+            throw new BotCommandException("Please enter Folder Name value");
 
         //Business Logic
         try {
-
+            /*..Initialize Session*/
             var sessionValues = (Map<String, Object>)sessionMap.get(sessionName);
             var ticket = sessionValues.get("Ticket").toString();
 
             //String request = "{ \"type\": \"" + 0 + "\", \"parent_id\": \"" + parentID + "\", \"name\": \"" + folderName+"\" }";
-            var request = "type="+ecmType+"&parent_id="+parentID+"&name="+folderName;
+            var request = ecmTypeKey+"="+ecmTypeValue+"&"+parentIDKey+"="+parentIDValue+"&"+folderNameKey+"="+folderNameValue;
 
             var url = new URL(ecmCreateFolderURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
-            con.setRequestProperty("OTCSTICKET",ticket);
-
+            con.setRequestProperty(authKey,ticket);
 
             var response = HttpUtils.execute(con, request.toString());
+            String returnValue = response.getBody();
             if (response.getCode() != HttpURLConnection.HTTP_OK) {
-                throw new BotCommandException(Utils.getErrorDetails(response));
+                returnValue = Utils.getErrorDetails(response);
+                //throw new BotCommandException(Utils.getErrorDetails(response));
             }
 
-            String folderID = JsonPath.parse(response.getBody()).read("$.id").toString();
-
-            //Return StringValue.
-            return new StringValue(folderID);
+            /*..Return StringValue*/
+            return new StringValue(returnValue);
             
         }
         catch (Exception e)

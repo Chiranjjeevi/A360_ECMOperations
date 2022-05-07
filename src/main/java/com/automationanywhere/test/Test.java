@@ -8,11 +8,16 @@ public class Test {
     {
 
          try {
+             /*
+             String filepath = "D:\\AA\\Projects\\Sabic\\getNode_Sample2.txt";
 
-             //String filepath = "D:\\AA\\Projects\\Sabic\\getNode_Sample2.txt";
+             Path fileName = Path.of(filepath);
+             String str = Files.readString(fileName);
 
-             //Path fileName = Path.of(filepath);
-            //String str = Files.readString(fileName);
+             boolean totalCount = JsonPath.read(str,"$.[?(@.range_max)]").toString().equalsIgnoreCase("[]");
+
+              */
+
 
             //System.out.println(FilenameUtils.getBaseName(filepath)); // PersonalPlanning
             //System.out.println(FilenameUtils.getName(filepath)); // PersonalPlanning.xlsx

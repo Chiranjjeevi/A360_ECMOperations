@@ -30,7 +30,7 @@ configure(allprojects){
 		testNgVersion = '6.14.3'
 		loggerVersion = '2.10.0'
 		jnaVersion = '5.3.1'	
-		version '1.0.0'
+		version '1.2.3'
 	}
 	group "$groupName"
 
@@ -101,11 +101,11 @@ configure(allprojects){
 
 
 		//Remove these dependencies if not needed
-/*		compile group: 'org.springframework', name: 'spring-jms', version: '5.0.2.RELEASE'
-		compile group: 'org.apache.activemq', name: 'activemq-all', version: '5.15.0'
-		compile group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.7.0'
+		//compile group: 'org.springframework', name: 'spring-jms', version: '5.0.2.RELEASE'
+		//compile group: 'org.apache.activemq', name: 'activemq-all', version: '5.15.0'
+		//compile group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.7.0'
 		// https://mvnrepository.com/artifact/com.h2database/h2
-		compile group: 'com.h2database', name: 'h2', version: '1.4.200'*/
+		//compile group: 'com.h2database', name: 'h2', version: '1.4.200'
 		
 	}
 	

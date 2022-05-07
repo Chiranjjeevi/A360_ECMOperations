@@ -3,8 +3,8 @@ package com.automationanywhere.botcommand;
 import com.automationanywhere.botcommand.data.Value;
 import com.automationanywhere.botcommand.data.impl.StringValue;
 import com.automationanywhere.botcommand.exception.BotCommandException;
-import com.automationanywhere.commandsdk.annotations.BotCommand;
 import com.automationanywhere.commandsdk.annotations.*;
+import com.automationanywhere.commandsdk.annotations.BotCommand;
 import com.automationanywhere.commandsdk.annotations.rules.LocalFile;
 import com.automationanywhere.commandsdk.annotations.rules.NotEmpty;
 import com.automationanywhere.helpers.MimeUtils;
@@ -26,24 +26,21 @@ import java.util.Map;
 
 import static com.automationanywhere.commandsdk.model.AttributeType.*;
 import static com.automationanywhere.commandsdk.model.DataType.STRING;
+
 /**
  * @author Chiranjjeevi Vijayakumar (CJ)
  *
  */
-
 @BotCommand
 
-//CommandPks adds required information to be displayable on GUI.
 @CommandPkg(
         //Unique name inside a package and label to display.
-        name = "UploadFile", label = "[[UploadFile.label]]",
-        node_label = "[[UploadFile.node_label]]", description = "[[UploadFile.description]]", icon = "pkg.svg",
+        name = "AddDocumentVersion", label = "[[AddDocumentVersion.label]]",
+        node_label = "[[AddDocumentVersion.node_label]]", description = "[[AddDocumentVersion.description]]", icon = "pkg.svg",
+        return_label = "[[AddDocumentVersion.return_label]]", return_type = STRING)
 
-        //Return type information. return_type ensures only the right kind of variable is provided on the UI.
-        return_label = "[[UploadFile.return_label]]", return_type = STRING)
-
-public class UploadFile {
-    private static Logger logger = LogManager.getLogger(UploadFile.class);
+public class AddDocumentVersion {
+    private static Logger logger = LogManager.getLogger(AddDocumentVersion.class);
     @Sessions
     private Map<String, Object> sessionMap;
 
@@ -52,19 +49,11 @@ public class UploadFile {
     String authGroup;
 
     @Idx(index = "4", type = GROUP)
-    @Pkg(label = "[[UploadFile.parentIDGroup.label]]")
-    String parentIDGroup;
-
-    @Idx(index = "5", type = GROUP)
-    @Pkg(label = "[[UploadFile.typeGroup.label]]")
-    String typeGroup;
-
-    @Idx(index = "6", type = GROUP)
-    @Pkg(label = "[[UploadFile.nameGroup.label]]")
+    @Pkg(label = "[[AddDocumentVersion.nameGroup.label]]")
     String nameGroup;
 
-    @Idx(index = "7", type = GROUP)
-    @Pkg(label = "[[UploadFile.fileBodyGroup.label]]")
+    @Idx(index = "5", type = GROUP)
+    @Pkg(label = "[[AddDocumentVersion.fileBodyGroup.label]]")
     String fileBodyGroup;
 
     @Execute
@@ -73,57 +62,37 @@ public class UploadFile {
             @Idx(index = "1", type = TEXT)
             @Pkg(label = "[[SessionName.label]]", description = "[[SessionName.description]]", default_value_type = STRING, default_value = "Default")
             @NotEmpty
-                    String sessionName,
+            String sessionName,
 
             @Idx(index = "2", type = TEXT)
-            @Pkg(label = "[[EcmURL.label]]", description = "[[EcmURL.description]]",default_value_type = STRING)
+            @Pkg(label = "[[EcmURL.label]]", description = "[[AddDocumentVersion.ecmURL.description]]",default_value_type = STRING)
             @NotEmpty
-                    String ecmUploadURL,
+            String ecmAddDocumentVersionURL,
 
             @Idx(index = "3.1", type = TEXT)
             @Pkg(label = "[[AuthName.label]]", description = "[[AuthName.description]]", default_value_type = STRING, default_value = "OTCSTICKET")
             @NotEmpty
-                    String authKey,
+            String authKey,
 
             @Idx(index = "4.1", type = TEXT)
-            @Pkg(label = "[[Key.label]]",default_value_type = STRING, default_value = "parent_id")
-            @NotEmpty
-                    String parentIDKey,
-
-            @Idx(index = "4.2", type = TEXT)
-            @Pkg(label = "[[Value.label]]", description = "[[UploadFile.parentID.description]]")
-            @NotEmpty
-                    String parentIDValue,
-
-            @Idx(index = "5.1", type = TEXT)
-            @Pkg(label = "[[Key.label]]", default_value_type = STRING, default_value = "type")
-            @NotEmpty
-                    String ecmTypeKey,
-
-            @Idx(index = "5.2", type = TEXT)
-            @Pkg(label = "[[Value.label]]", description = "[[UploadFile.ecmText.description]]", default_value_type = STRING, default_value = "144")
-            @NotEmpty
-                    String ecmTypeValue,
-
-            @Idx(index = "6.1", type = TEXT)
             @Pkg(label = "[[Key.label]]", default_value_type = STRING, default_value = "name")
             @NotEmpty
-                    String nameKey,
+            String nameKey,
 
-            @Idx(index = "6.2", type = TEXT)
-            @Pkg(label = "[[Value.label]]", description = "[[UploadFile.ecmName.description]]", default_value_type = STRING)
-                    String nameValue,
+            @Idx(index = "4.2", type = TEXT)
+            @Pkg(label = "[[Value.label]]", description = "[[AddDocumentVersion.ecmName.description]]", default_value_type = STRING)
+            String nameValue,
 
-            @Idx(index = "7.1", type = TEXT)
-            @Pkg(label = "[[Key.label]]", description = "[[UploadFile.fileContent.description]]", default_value_type = STRING, default_value = "file")
+            @Idx(index = "5.1", type = TEXT)
+            @Pkg(label = "[[Key.label]]", description = "[[AddDocumentVersion.fileContent.description]]", default_value_type = STRING, default_value = "file")
             @NotEmpty
-                    String fileKey,
+            String fileKey,
 
-            @Idx(index = "7.2", type = FILE)
-            @Pkg(label = "[[UploadFile.fullFilePath.label]]",description = "[[UploadFile.fullFilePath.description]]")
+            @Idx(index = "5.2", type = FILE)
+            @Pkg(label = "[[AddDocumentVersion.fullFilePath.label]]",description = "[[AddDocumentVersion.fullFilePath.description]]")
             @LocalFile
             @NotEmpty
-                    String fullFilePath)  throws IOException, InterruptedException{
+            String fullFilePath)  throws IOException, InterruptedException{
 
         //NULL Check
         if (sessionName == null || "".equals(sessionName.trim()))
@@ -132,23 +101,11 @@ public class UploadFile {
         if (!sessionMap.containsKey(sessionName))
             throw new BotCommandException("There are no existing session");
 
-        if (ecmUploadURL == null || "".equals(ecmUploadURL.trim()))
+        if (ecmAddDocumentVersionURL == null || "".equals(ecmAddDocumentVersionURL.trim()))
             throw new BotCommandException("Please provide ECM Upload API");
 
         if (authKey == null || "".equals(authKey.trim()))
             throw new BotCommandException("Please provide ECM Auth Key parameter name");
-
-        if (parentIDKey == null || "".equals(parentIDKey.trim()))
-            throw new BotCommandException("Please enter Parent Node ID key");
-
-        if (parentIDValue == null || "".equals(parentIDValue.trim()))
-            throw new BotCommandException("Please enter Parent Node ID value");
-
-        if (ecmTypeKey == null ||"".equals(ecmTypeKey.trim()))
-            throw new BotCommandException("Please enter ECM type key");
-
-        if (ecmTypeValue == null ||"".equals(ecmTypeValue.trim()))
-            throw new BotCommandException("Please enter ECM type value");
 
         if (nameKey == null ||"".equals(nameKey.trim()))
             throw new BotCommandException("Please enter ECM name key");
@@ -164,7 +121,7 @@ public class UploadFile {
             var sessionValues = (Map<String, Object>)sessionMap.get(sessionName);
             var ticket = sessionValues.get("Ticket").toString();
 
-            var url = new URL(ecmUploadURL);
+            var url = new URL(ecmAddDocumentVersionURL);
 
             File uploadFile = new File(fullFilePath);
 
@@ -174,8 +131,6 @@ public class UploadFile {
                 nameValue = FilenameUtils.getName(fullFilePath);
 
             MultipartBody multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart(parentIDKey,parentIDValue)
-                    .addFormDataPart(ecmTypeKey,ecmTypeValue)
                     .addFormDataPart(nameKey,nameValue)
                     .addFormDataPart(fileKey,nameValue,fileBody)
                     .build();
@@ -187,7 +142,7 @@ public class UploadFile {
                     .build();
 
             var response = OkHttpUtils.upload(request);
-            String returnValue = response.getBody();
+            String returnValue = "Success";
             if (response.getCode() != HttpURLConnection.HTTP_OK) {
                 returnValue = Utils.getErrorDetails(response);
                 //throw new BotCommandException(Utils.getErrorDetails(response));
@@ -198,10 +153,11 @@ public class UploadFile {
 
         }
         catch (Exception e)
-        { throw new BotCommandException("Error occurred while ECM Upload: " + e.getMessage()); }
+        { throw new BotCommandException("Error occurred while ECM Add document version: " + e.getMessage()); }
 
     }
     public void setSessionMap(Map<String, Object> sessionMap) {
         this.sessionMap = sessionMap;
     }
+
 }

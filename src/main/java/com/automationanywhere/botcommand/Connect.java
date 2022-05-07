@@ -25,8 +25,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.automationanywhere.commandsdk.model.AttributeType.CREDENTIAL;
-import static com.automationanywhere.commandsdk.model.AttributeType.TEXT;
+import static com.automationanywhere.commandsdk.model.AttributeType.*;
 import static com.automationanywhere.commandsdk.model.DataType.STRING;
 
 /**
@@ -39,9 +38,16 @@ import static com.automationanywhere.commandsdk.model.DataType.STRING;
 
 public class Connect {
     private static Logger logger = LogManager.getLogger(Connect.class);
-
     @Sessions
     private Map<String, Object> sessionMap;
+
+    @Idx(index = "3", type = GROUP)
+    @Pkg(label = "[[Connect.usernameGroup.label]]")
+    String usernameGroup;
+
+    @Idx(index = "4", type = GROUP)
+    @Pkg(label = "[[Connect.passwordGroup.label]]")
+    String passwordGroup;
 
     @Execute
     public void execute(
@@ -51,27 +57,43 @@ public class Connect {
                     String sessionName,
 
             @Idx(index = "2", type = TEXT)
-            @Pkg(label = "[[Connect.ecmURL.label]]", description = "[[Connect.ecmURL.description]]")
+            @Pkg(label = "[[EcmURL.label]]", description = "[[Connect.ecmAuthURL.description]]")
             @NotEmpty
                     String ecmAuthUrl,
 
-            @Idx(index = "3", type = CREDENTIAL)
-            @Pkg(label = "[[Connect.username.label]]")
+            @Idx(index = "3.1", type = TEXT)
+            @Pkg(label = "[[Key.label]]",default_value_type = STRING, default_value = "username")
             @NotEmpty
-                    SecureString username,
+                    String usernameKey,
 
-            @Idx(index = "4", type = CREDENTIAL)
-            @Pkg(label = "[[Connect.password.label]]")
+            @Idx(index = "3.2", type = CREDENTIAL)
+            @Pkg(label = "[[Value.label]]")
             @NotEmpty
-                    SecureString password) throws IOException, InterruptedException {
+                    SecureString usernameValue,
+
+            @Idx(index = "4.1", type = TEXT)
+            @Pkg(label = "[[Key.label]]",default_value_type = STRING, default_value = "password")
+            @NotEmpty
+                    String passwordKey,
+
+            @Idx(index = "4.2", type = CREDENTIAL)
+            @Pkg(label = "[[Value.label]]")
+            @NotEmpty
+                    SecureString passwordValue) throws IOException, InterruptedException {
 
         if (sessionName == null || "".equals(sessionName.trim()))
             throw new BotCommandException("Please enter session name");
 
-        if (username == null || "".equals(username.getInsecureString().trim()))
+        if (usernameKey == null || "".equals(usernameKey.trim()))
+            throw new BotCommandException("Please enter username key");
+
+        if (usernameValue == null || "".equals(usernameValue.getInsecureString().trim()))
             throw new BotCommandException("Please enter username");
 
-        if (password == null || "".equals(password.getInsecureString().trim()))
+        if (passwordKey == null || "".equals(passwordKey.trim()))
+            throw new BotCommandException("Please enter password key");
+
+        if (passwordValue == null || "".equals(passwordValue.getInsecureString().trim()))
             throw new BotCommandException("Please enter either password");
 
         if (ecmAuthUrl == null || "".equals(ecmAuthUrl.trim()))
@@ -81,11 +103,11 @@ public class Connect {
             throw new BotCommandException("Session name already exists");
 
         try {
+            /*..Initialize Session*/
+            String usernameVal = usernameValue.getInsecureString();
+            String passwordVal = passwordValue.getInsecureString();
 
-            String usernameVal = username.getInsecureString();
-            String passwordVal = password.getInsecureString();
-
-            var request = "username="+usernameVal+"&password="+passwordVal;
+            var request = usernameKey+"="+usernameVal+"&"+passwordKey+"="+passwordVal;
 
             var url = new URL(ecmAuthUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
